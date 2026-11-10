@@ -1,0 +1,1533 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SkySense Pro</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { height: 100%; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            user-select: none; -webkit-user-select: none;
+            background: #000; color: #fff;
+            position: fixed; inset: 0;
+            display: flex; flex-direction: column;
+            overflow: hidden;
+        }
+
+        .flex { display: flex; }
+        .flex-col { flex-direction: column; }
+        .flex-1 { flex: 1 1 0%; }
+        .shrink-0 { flex-shrink: 0; }
+        .grid { display: grid; }
+        .grid-cols-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+        .items-center { align-items: center; }
+        .items-baseline { align-items: baseline; }
+        .justify-center { justify-content: center; }
+        .justify-between { justify-content: space-between; }
+
+        .fixed { position: fixed; }
+        .absolute { position: absolute; }
+        .relative { position: relative; }
+        .inset-0 { inset: 0; }
+        .top-0 { top: 0; }
+        .top-2 { top: 0.5rem; }
+        .top-1\/2 { top: 50%; }
+        .top-\[10\%\] { top: 10%; }
+        .-top-7 { top: -1.75rem; }
+        .left-0 { left: 0; }
+        .left-1\/2 { left: 50%; }
+        .left-2 { left: 0.5rem; }
+        .left-4 { left: 1rem; }
+        .-left-7 { left: -1.75rem; }
+        .right-2 { right: 0.5rem; }
+        .right-4 { right: 1rem; }
+        .-right-7 { right: -1.75rem; }
+        .bottom-3 { bottom: 0.75rem; }
+        .bottom-4 { bottom: 1rem; }
+        .bottom-6 { bottom: 1.5rem; }
+        .bottom-20 { bottom: 5rem; }
+        .-bottom-4 { bottom: -1rem; }
+        .-bottom-7 { bottom: -1.75rem; }
+        .z-10 { z-index: 10; }
+        .z-20 { z-index: 20; }
+        .-translate-y-1\/2 { transform: translateY(-50%); }
+        .-translate-x-1\/2 { transform: translateX(-50%); }
+
+        .w-full { width: 100%; }
+        .h-full { height: 100%; }
+        .min-h-0 { min-height: 0; }
+        .h-8 { height: 2rem; }
+        .w-8 { width: 2rem; }
+        .h-11 { height: 2.75rem; }
+        .h-12 { height: 3rem; }
+        .w-12 { width: 3rem; }
+        .w-10 { width: 2.5rem; }
+        .w-11 { width: 2.75rem; }
+        .w-3\.5 { width: 0.875rem; }
+        .max-w-lg { max-width: 32rem; }
+        .max-w-\[360px\] { max-width: 360px; }
+        .max-h-\[360px\] { max-height: 360px; }
+        .min-h-\[5rem\] { min-height: 5rem; }
+        .max-h-\[120px\] { max-height: 120px; }
+        .h-\[13vh\] { height: 13vh; }
+        .h-\[55\%\] { height: 55%; }
+        .h-\[1px\] { height: 1px; }
+        .w-\[85vmin\] { width: 85vmin; }
+        .h-\[85vmin\] { height: 85vmin; }
+
+        .p-1 { padding: 0.25rem; }
+        .px-2 { padding-left: 0.5rem; padding-right: 0.5rem; }
+        .px-2\.5 { padding-left: 0.625rem; padding-right: 0.625rem; }
+        .px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
+        .px-4 { padding-left: 1rem; padding-right: 1rem; }
+        .py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
+        .py-1\.5 { padding-top: 0.375rem; padding-bottom: 0.375rem; }
+        .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+        .py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
+        .pt-1 { padding-top: 0.25rem; }
+        .pt-2 { padding-top: 0.5rem; }
+        .pb-\[env\(safe-area-inset-bottom\,0\.75rem\)\] { padding-bottom: env(safe-area-inset-bottom, 0.75rem); }
+        .mb-1 { margin-bottom: 0.25rem; }
+        .mb-2 { margin-bottom: 0.5rem; }
+        .mt-0\.5 { margin-top: 0.125rem; }
+        .mt-1 { margin-top: 0.25rem; }
+        .mt-2 { margin-top: 0.5rem; }
+        .ml-1 { margin-left: 0.25rem; }
+        .-mt-7 { margin-top: -1.75rem; }
+        .gap-1 { gap: 0.25rem; }
+        .gap-1\.5 { gap: 0.375rem; }
+        .gap-2 { gap: 0.5rem; }
+        .gap-6 { gap: 1.5rem; }
+
+        .text-\[9px\] { font-size: 9px; }
+        .text-\[10px\] { font-size: 10px; }
+        .text-\[11px\] { font-size: 11px; }
+        .text-\[13px\] { font-size: 13px; }
+        .text-\[64px\] { font-size: 64px; }
+        .text-xs { font-size: 0.75rem; }
+        .text-sm { font-size: 0.875rem; }
+        .text-base { font-size: 1rem; }
+        .text-lg { font-size: 1.125rem; }
+        .text-xl { font-size: 1.25rem; }
+        .text-2xl { font-size: 1.5rem; }
+        .text-3xl { font-size: 1.875rem; }
+        .text-4xl { font-size: 2.25rem; }
+        .text-5xl { font-size: 3rem; }
+        .text-6xl { font-size: 3.75rem; }
+        @media (min-width: 640px) {
+            .sm\:text-xl { font-size: 1.25rem; }
+            .sm\:text-2xl { font-size: 1.5rem; }
+            .sm\:text-3xl { font-size: 1.875rem; }
+            .sm\:text-6xl { font-size: 3.75rem; }
+        }
+
+        .main-value-huge  { font-size: min(30vmin, 12rem); line-height: 1; }
+        .main-value-rth   { font-size: min(24vmin, 9rem);  line-height: 1; }
+        .main-unit-huge   { font-size: min(4vmin, 2rem); }
+
+        .font-bold { font-weight: 700; }
+        .font-black { font-weight: 900; }
+        .uppercase { text-transform: uppercase; }
+        .tracking-tight { letter-spacing: -0.025em; }
+        .tracking-tighter { letter-spacing: -0.05em; }
+        .tracking-widest { letter-spacing: 0.1em; }
+        .leading-none { line-height: 1; }
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+
+        .bg-black { background-color: #000; }
+        .bg-black\/60 { background-color: rgba(0, 0, 0, 0.6); }
+        .bg-black\/70 { background-color: rgba(0, 0, 0, 0.7); }
+        .bg-white { background-color: #fff; }
+        .bg-zinc-950 { background-color: #09090b; }
+        .bg-zinc-900 { background-color: #18181b; }
+        .bg-zinc-900\/70 { background-color: rgba(24, 24, 27, 0.7); }
+        .bg-zinc-900\/80 { background-color: rgba(24, 24, 27, 0.8); }
+        .bg-zinc-800 { background-color: #27272a; }
+        .bg-zinc-800\/90 { background-color: rgba(39, 39, 42, 0.9); }
+        .bg-zinc-700 { background-color: #3f3f46; }
+        .bg-blue-600 { background-color: #2563eb; }
+        .bg-blue-500 { background-color: #3b82f6; }
+        .bg-emerald-600 { background-color: #059669; }
+        .bg-emerald-500 { background-color: #10b981; }
+        .bg-emerald-600\/20 { background-color: rgba(5, 150, 105, 0.2); }
+        .bg-emerald-600\/40 { background-color: rgba(5, 150, 105, 0.4); }
+        .bg-purple-600 { background-color: #9333ea; }
+        .bg-purple-600\/20 { background-color: rgba(147, 51, 234, 0.2); }
+        .bg-purple-600\/40 { background-color: rgba(147, 51, 234, 0.4); }
+        .bg-red-600 { background-color: #dc2626; }
+        .bg-red-500 { background-color: #ef4444; }
+
+        .text-white { color: #fff; }
+        .text-zinc-300 { color: #d4d4d8; }
+        .text-zinc-400 { color: #a1a1aa; }
+        .text-zinc-500 { color: #71717a; }
+        .text-blue-400 { color: #60a5fa; }
+        .text-blue-500 { color: #3b82f6; }
+        .text-emerald-400 { color: #34d399; }
+        .text-emerald-500 { color: #10b981; }
+        .text-red-500 { color: #ef4444; }
+        .text-red-400 { color: #f87171; }
+        .text-yellow-400 { color: #facc15; }
+        .text-purple-400 { color: #c084fc; }
+
+        .border { border-width: 1px; border-style: solid; }
+        .border-b { border-bottom-width: 1px; border-bottom-style: solid; }
+        .border-t { border-top-width: 1px; border-top-style: solid; }
+        .border-zinc-900 { border-color: #18181b; }
+        .border-zinc-800 { border-color: #27272a; }
+        .border-zinc-800\/50 { border-color: rgba(39, 39, 42, 0.5); }
+        .border-zinc-700 { border-color: #3f3f46; }
+        .border-emerald-600 { border-color: #059669; }
+        .border-purple-800 { border-color: #6b21a8; }
+        .border-\[8px\] { border-width: 8px; border-style: solid; }
+        .border-\[4px\] { border-width: 4px; border-style: solid; }
+        .rounded { border-radius: 0.25rem; }
+        .rounded-lg { border-radius: 0.5rem; }
+        .rounded-xl { border-radius: 0.75rem; }
+        .rounded-full { border-radius: 9999px; }
+        .rounded-3xl { border-radius: 1.5rem; }
+
+        .shadow-md { box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1); }
+        .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1); }
+        .shadow-inner { box-shadow: inset 0 2px 4px 0 rgba(0,0,0,0.05); }
+        .shadow-\[0_0_10px_rgba\(37\,99\,235\,0\.4\)\] { box-shadow: 0 0 10px rgba(37, 99, 235, 0.4); }
+        .drop-shadow-\[0_4px_8px_rgba\(0\,0\,0\,1\)\] { filter: drop-shadow(0 4px 8px rgba(0,0,0,1)); }
+        .drop-shadow-\[0_2px_4px_rgba\(0\,0\,0\,1\)\] { filter: drop-shadow(0 2px 4px rgba(0,0,0,1)); }
+        .drop-shadow-\[0_0_15px_rgba\(59\,130\,246\,1\)\] { filter: drop-shadow(0 0 15px rgba(59,130,246,1)); }
+        .backdrop-blur-md { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+        .backdrop-blur-sm { backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
+        .opacity-0 { opacity: 0; }
+        .opacity-50 { opacity: 0.5; }
+        .overflow-hidden { overflow: hidden; }
+
+        .transition-colors { transition-property: color, background-color, border-color; transition-timing-function: cubic-bezier(0.4,0,0.2,1); transition-duration: 150ms; }
+        .transition-transform { transition-property: transform; transition-timing-function: cubic-bezier(0.4,0,0.2,1); transition-duration: 150ms; }
+        .transition-all { transition-property: all; transition-timing-function: cubic-bezier(0.4,0,0.2,1); transition-duration: 150ms; }
+        .duration-100 { transition-duration: 100ms; }
+        .duration-200 { transition-duration: 200ms; }
+        .ease-linear { transition-timing-function: linear; }
+        .origin-bottom { transform-origin: bottom; }
+        .origin-top { transform-origin: top; }
+
+        .cursor-grab { cursor: grab; }
+        .pointer-events-none { pointer-events: none; }
+        .pointer-events-auto { pointer-events: auto; }
+        .hidden { display: none; }
+
+        @media (hover: hover) {
+            .hover\:bg-blue-500:hover { background-color: #3b82f6; }
+            .hover\:bg-zinc-700:hover { background-color: #3f3f46; }
+            .hover\:bg-emerald-600\/40:hover { background-color: rgba(5, 150, 105, 0.4); }
+            .hover\:bg-purple-600\/40:hover { background-color: rgba(147, 51, 234, 0.4); }
+        }
+        .active\:bg-zinc-800:active { background-color: #27272a; }
+        .active\:bg-zinc-700:active { background-color: #3f3f46; }
+
+        .icon { width: 1em; height: 1em; display: inline-block; vertical-align: middle; }
+        .ph-bold { stroke-width: 2.5; }
+        .ph-fill { fill: currentColor; }
+
+        .aux-panel.dragging { opacity: 0.5; transform: scale(0.95); }
+        .aux-panel.drag-over { border-color: #3b82f6; background-color: #1f2937; }
+
+        .compass-label { display: inline-block; transform-origin: center center; }
+
+        /* CSS corregido para el mapa */
+        #map-view {
+            position: absolute;
+            top: 0; right: 0; bottom: 0; left: 0;
+            overflow: hidden;
+        }
+        #leaflet-map {
+            position: absolute;
+            top: 0; right: 0; bottom: 0; left: 0;
+            background: #18181b;
+        }
+        .leaflet-container { background: #18181b; font-family: inherit; }
+        .leaflet-control-attribution { background: rgba(0,0,0,0.6) !important; color: #a1a1aa !important; font-size: 9px !important; }
+        .leaflet-control-attribution a { color: #60a5fa !important; }
+    </style>
+</head>
+<body>
+
+    <div class="h-11 bg-zinc-950 border-b border-zinc-900 flex items-center justify-between px-2 z-20 shrink-0 relative">
+        <div class="flex items-center gap-1.5">
+            <button id="btn-bt" onclick="connectBluetooth()" class="bg-blue-600 hover:bg-blue-500 text-white px-2.5 py-1 rounded-full text-[11px] font-bold transition-colors flex items-center gap-1 shadow-[0_0_10px_rgba(37,99,235,0.4)]">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7l10 10-5 5V2l5 5L7 17"/></svg>
+                <span id="bt-status">Vario</span>
+            </button>
+            <button id="btn-gps" onclick="toggleGPS()" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-2.5 py-1 rounded-full text-[11px] font-bold transition-colors flex items-center gap-1">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="22" y1="12" x2="18" y2="12"/><line x1="6" y1="12" x2="2" y2="12"/><line x1="12" y1="6" x2="12" y2="2"/><line x1="12" y1="22" x2="12" y2="18"/></svg>
+                <span id="gps-status">GPS</span>
+            </button>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+            <button id="btn-audio" onclick="toggleAudio()" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 w-8 h-8 rounded-full text-[13px] font-bold transition-colors flex items-center justify-center" title="Audio vario">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="22" x2="16" y1="9" y2="15"/><line x1="16" x2="22" y1="9" y2="15"/></svg>
+            </button>
+            <button id="btn-map" onclick="toggleMap()" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 w-8 h-8 rounded-full text-[13px] font-bold transition-colors flex items-center justify-center" title="Mapa">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z"/><path d="M15 5.764v15"/><path d="M9 3.236v15"/></svg>
+            </button>
+            <button id="btn-igc" onclick="downloadIGC()" class="bg-emerald-600/20 text-emerald-500 border border-emerald-600 hover:bg-emerald-600/40 px-2.5 py-1 rounded-full text-[11px] font-bold transition-colors hidden">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                IGC
+            </button>
+            <button id="btn-sim" onclick="toggleSim()" class="bg-purple-600/20 text-purple-400 border border-purple-800 w-8 h-8 rounded-full transition-colors flex items-center justify-center" title="Simular">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" x2="10" y1="11" y2="11"/><line x1="8" x2="8" y1="9" y2="13"/><line x1="15" x2="15.01" y1="12" y2="12"/><line x1="18" x2="18.01" y1="10" y2="10"/><path d="M17.32 5H6.68a4 4 0 0 0-3.978 3.59c-.006.052-.01.101-.017.152C2.604 9.416 2 14.456 2 16a3 3 0 0 0 3 3c1 0 1.5-.5 2-1l1.414-1.414A2 2 0 0 1 9.828 16h4.344a2 2 0 0 1 1.414.586L17 18c.5.5 1 1 2 1a3 3 0 0 0 3-3c0-1.545-.604-6.584-.685-7.258-.007-.05-.011-.1-.017-.151A4 4 0 0 0 17.32 5z"/></svg>
+            </button>
+        </div>
+    </div>
+
+    <div class="flex-1 min-h-0 w-full relative">
+        <div id="main-display" class="absolute inset-0 flex flex-col items-center justify-center bg-black overflow-hidden z-10"></div>
+
+        <div id="map-view" class="hidden z-20">
+            <div id="leaflet-map"></div>
+
+            <div class="absolute top-2 left-2 pointer-events-none z-10">
+                <div class="bg-black/70 backdrop-blur-sm rounded-lg px-3 py-2 border border-zinc-800">
+                    <div class="text-[10px] text-zinc-400 font-bold tracking-widest">VARIO</div>
+                    <div id="map-vario" class="text-4xl font-black leading-none mt-0.5">+0.0</div>
+                </div>
+            </div>
+            <div class="absolute top-2 right-2 pointer-events-none z-10">
+                <div class="bg-black/70 backdrop-blur-sm rounded-lg px-3 py-2 border border-zinc-800 text-right">
+                    <div class="text-[10px] text-zinc-400 font-bold tracking-widest">ALT</div>
+                    <div id="map-alt" class="text-2xl font-black leading-none">0<span class="text-sm text-zinc-400 ml-1">m</span></div>
+                    <div class="text-[10px] text-zinc-400 font-bold tracking-widest mt-2">VEL</div>
+                    <div id="map-speed" class="text-2xl font-black leading-none">0<span class="text-sm text-zinc-400 ml-1">km/h</span></div>
+                </div>
+            </div>
+
+            <div class="absolute bottom-4 right-4 flex gap-2 z-20">
+                <button onclick="centerMap()" class="bg-zinc-800/90 hover:bg-zinc-700 text-white w-12 h-12 rounded-full shadow-lg border border-zinc-700 flex items-center justify-center" title="Centrar">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+                <button onclick="toggleMap()" class="bg-zinc-800/90 hover:bg-zinc-700 text-white w-12 h-12 rounded-full shadow-lg border border-zinc-700 flex items-center justify-center" title="Cerrar">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="shrink-0 w-full bg-black flex flex-col items-center justify-center border-t border-zinc-900 pt-1 pb-[env(safe-area-inset-bottom,0.75rem)]">
+        <div class="w-full max-w-lg px-4 py-3 flex items-center justify-between bg-zinc-950 border-b border-zinc-900">
+            <div class="text-xs text-zinc-400 font-bold uppercase tracking-widest flex items-center gap-2">
+                <svg class="icon ph-bold text-3xl text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2"/><path d="M9.6 4.6A2 2 0 1 1 11 8H2"/><path d="M12.6 19.4A2 2 0 1 0 14 16H2"/></svg>
+                VIENTO
+            </div>
+            <div class="flex items-center gap-6">
+                <div class="flex items-baseline gap-1">
+                    <span id="wind-val" class="font-black text-white text-5xl sm:text-6xl leading-none">--</span>
+                    <span class="text-base text-zinc-400 font-bold">km/h</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span id="wind-dir" class="font-bold text-blue-400 text-2xl sm:text-3xl w-10 text-center">--</span>
+                    <div class="w-11 h-11 rounded-full border border-zinc-700 flex items-center justify-center bg-zinc-900 relative shadow-inner">
+                        <svg id="wind-arrow" class="icon ph-bold text-white text-xl transition-transform duration-100" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transform: rotate(0deg)"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-5 gap-1.5 w-full px-2 max-w-lg pt-2" id="aux-display"></div>
+    </div>
+
+    <script>
+        const ICON_PATHS = {
+            'bluetooth':      '<path d="M7 7l10 10-5 5V2l5 5L7 17"/>',
+            'crosshair':      '<circle cx="12" cy="12" r="10"/><line x1="22" y1="12" x2="18" y2="12"/><line x1="6" y1="12" x2="2" y2="12"/><line x1="12" y1="6" x2="12" y2="2"/><line x1="12" y1="22" x2="12" y2="18"/>',
+            'download':       '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>',
+            'gamepad':        '<line x1="6" x2="10" y1="11" y2="11"/><line x1="8" x2="8" y1="9" y2="13"/><line x1="15" x2="15.01" y1="12" y2="12"/><line x1="18" x2="18.01" y1="10" y2="10"/><path d="M17.32 5H6.68a4 4 0 0 0-3.978 3.59c-.006.052-.01.101-.017.152C2.604 9.416 2 14.456 2 16a3 3 0 0 0 3 3c1 0 1.5-.5 2-1l1.414-1.414A2 2 0 0 1 9.828 16h4.344a2 2 0 0 1 1.414.586L17 18c.5.5 1 1 2 1a3 3 0 0 0 3-3c0-1.545-.604-6.584-.685-7.258-.007-.05-.011-.1-.017-.151A4 4 0 0 0 17.32 5z"/>',
+            'speaker-high':   '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>',
+            'speaker-slash':  '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="22" x2="16" y1="9" y2="15"/><line x1="16" x2="22" y1="9" y2="15"/>',
+            'wind':           '<path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2"/><path d="M9.6 4.6A2 2 0 1 1 11 8H2"/><path d="M12.6 19.4A2 2 0 1 0 14 16H2"/>',
+            'arrows-down-up': '<path d="m3 16 4 4 4-4"/><path d="M7 20V4"/><path d="m21 8-4-4-4 4"/><path d="M17 4v16"/>',
+            'mountains':      '<path d="m8 3 4 8 5-5 5 15H2L8 3z"/>',
+            'compass':        '<circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>',
+            'paper-plane':    '<path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/>',
+            'house':          '<path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
+            'arrow-up':       '<path d="m5 12 7-7 7 7"/><path d="M12 19V5"/>',
+            'caret-up':       '<polygon points="12 4 20 20 4 20" fill="currentColor" stroke="none"/>'
+        };
+        function svgIcon(name, extraClass = '', id = '') {
+            const idAttr = id ? ` id="${id}"` : '';
+            return `<svg${idAttr} class="icon ${extraClass}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICON_PATHS[name] || ''}</svg>`;
+        }
+
+        let activeMainId = 'vario';
+        let auxOrder = ['speed', 'alt', 'bearing', 'gr', 'rth'];
+        let isSimulating = false;
+
+        let bleDevice = null;
+        let bleCharacteristic = null;
+        let bleBuffer = '';
+
+        let gpsWatchId = null;
+        let isGpsActive = false;
+        let flightPath = [];
+        let gpsWindow = [];
+        let windSpeed = 0;
+        let windToDeg = 0;
+        let windFromDeg = 0;
+
+        let airX = 0, airY = 0;
+        let homeLocation = null;
+        let homeAlt = 0;
+        let baroOffset = 0;
+
+        let audioCtx = null, audioOsc = null, audioGain = null, audioEnabled = false;
+        let wakeLock = null;
+
+        let mapViewActive = false;
+        let leafletMap = null;
+        let mapPositionMarker = null;
+        let mapHomeMarker = null;
+        let mapTrailLayer = null;
+        let mapInitialized = false;
+        let mapFollowMode = true;
+        let lastMapUpdate = 0;
+
+        const metrics = {
+            vario:   { id: 'vario',   label: 'Vario',     unit: 'm/s',  value: 0.0,  smoothed: 0.0,  icon: 'arrows-down-up', source: null },
+            speed:   { id: 'speed',   label: 'Velocidad', unit: 'km/h', value: 38,   smoothed: 38,   icon: 'wind',           source: null },
+            alt:     { id: 'alt',     label: 'Altitud',   unit: 'm',    value: 1250, smoothed: 1250, icon: 'mountains',      source: null },
+            bearing: { id: 'bearing', label: 'Rumbo',     unit: '',     value: 0,    smoothed: 0,    icon: 'compass' },
+            gr:      { id: 'gr',      label: 'Planeo',    unit: '',     value: 8.5,  smoothed: 8.5,  icon: 'paper-plane' },
+            rth:     { id: 'rth',     label: 'Despegue',  unit: 'km',   value: 0,    smoothed: 0,    targetBearing: 0, icon: 'house' }
+        };
+
+        let thermalHistory = [];
+        let lastThermalPush = 0;
+        let gliderAngle = 0;
+
+        function getCardinal(angle) {
+            const dirs = ['N', 'NE', 'E', 'SE', 'S', 'SO', 'O', 'NO'];
+            return dirs[Math.round(angle / 45) % 8];
+        }
+
+        function getColorClass(id, value) {
+            if (id === 'vario') {
+                if (value >= 1) return 'text-red-500';
+                if (value >= 0.1) return 'text-red-400';
+                if (value <= -1.5) return 'text-blue-500';
+                return 'text-white';
+            }
+            if (id === 'gr') {
+                if (value <= 0) return 'text-emerald-400';
+                if (value >= 8.0) return 'text-white';
+                if (value >= 5.0) return 'text-yellow-400';
+                return 'text-red-500';
+            }
+            return 'text-white';
+        }
+
+        function formatValueText(id, value) {
+            if (id === 'vario') {
+                const v = Math.abs(value) < 0.05 ? 0 : value;
+                return (v > 0 ? '+' : '') + v.toFixed(1);
+            }
+            if (id === 'bearing') return getCardinal(value);
+            if (id === 'rth') return value.toFixed(1);
+            if (id === 'gr') {
+                if (value <= 0) return '+';
+                if (value > 99) return '>99:1';
+                return value.toFixed(1) + ':1';
+            }
+            return Math.round(value).toString();
+        }
+
+        function getDistanceAndBearing(lat1, lon1, lat2, lon2) {
+            const R = 6371;
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLon/2) * Math.sin(dLon/2);
+            const dist = R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
+            const y = Math.sin(dLon) * Math.cos(lat2 * Math.PI / 180);
+            const x = Math.cos(lat1 * Math.PI / 180) * Math.sin(lat2 * Math.PI / 180) -
+                      Math.sin(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.cos(dLon);
+            let brng = Math.atan2(y, x) * 180 / Math.PI;
+            return { distance: dist, bearing: (brng + 360) % 360 };
+        }
+
+        function setHomeLocation() {
+            if (isSimulating) {
+                const s = window._simState || { centerLat: -34.6, centerLon: -58.4 };
+                homeLocation = { lat: s.centerLat, lon: s.centerLon };
+                homeAlt = metrics.alt.smoothed - 800;
+                metrics.rth.value = 0;
+                metrics.rth.smoothed = 0;
+                return;
+            }
+            if (flightPath.length > 0) {
+                const p = flightPath[flightPath.length - 1];
+                homeLocation = { lat: p.lat, lon: p.lon };
+                homeAlt = metrics.alt.smoothed;
+                metrics.rth.value = 0;
+                metrics.rth.smoothed = 0;
+            } else {
+                alert("No hay señal GPS todavía para fijar home.");
+            }
+        }
+
+        function calibrateAltitude() {
+            const current = metrics.alt.smoothed;
+            const input = prompt(`Altitud actual real (m MSL):`, Math.round(current));
+            if (input === null) return;
+            const target = parseFloat(input);
+            if (isNaN(target)) return;
+            const delta = target - current;
+            baroOffset += delta;
+            metrics.alt.value += delta;
+            metrics.alt.smoothed += delta;
+            if (homeLocation) homeAlt += delta;
+            try { localStorage.setItem('skysense_baroOffset', String(baroOffset)); } catch {}
+        }
+
+        function mainValueClass(id) {
+            if (id === 'vario') return 'text-4xl';
+            if (id === 'rth')   return 'main-value-rth';
+            return 'main-value-huge';
+        }
+        function mainUnitClass(id) {
+            if (id === 'vario') return 'text-xs';
+            return 'main-unit-huge';
+        }
+
+        function updateDisplay() {
+            const mainContainer = document.getElementById('main-display');
+            const auxContainer = document.getElementById('aux-display');
+            const main = metrics[activeMainId];
+
+            if (main.id === 'vario') {
+                mainContainer.innerHTML = `
+                    <canvas id="thermal-canvas" class="absolute inset-0 w-full h-full"></canvas>
+                    <div class="absolute left-2 top-1/2 -translate-y-1/2 h-[55%] w-3.5 bg-zinc-900/80 border border-zinc-700 rounded-full overflow-hidden flex flex-col justify-center items-center z-10">
+                        <div class="absolute top-1/2 left-0 w-full h-[1px] bg-white z-20"></div>
+                        <div id="vario-bar" class="absolute w-full left-0 bg-red-500 transition-all duration-100 ease-linear origin-bottom" style="height: 0%; bottom: 50%;"></div>
+                        <div id="vario-bar-down" class="absolute w-full left-0 bg-blue-500 transition-all duration-100 ease-linear origin-top" style="height: 0%; top: 50%;"></div>
+                    </div>
+                    <div class="z-10 absolute bottom-3 flex items-baseline gap-2 bg-zinc-900/70 border border-zinc-800 px-4 py-1.5 rounded-full backdrop-blur-md">
+                        <span id="main-val" class="${mainValueClass(main.id)} font-black tracking-tighter leading-none ${getColorClass(main.id, main.value)}">${formatValueText(main.id, main.value)}</span>
+                        <span class="${mainUnitClass(main.id)} text-zinc-400 font-bold">${main.unit}</span>
+                    </div>
+                `;
+            } else if (main.id === 'rth') {
+                mainContainer.innerHTML = `
+                    <div class="text-zinc-500 uppercase tracking-widest font-bold text-sm mb-2 flex items-center gap-2 z-10">
+                        ${svgIcon(main.icon, 'text-xl')} ${main.label}
+                    </div>
+                    <div class="relative w-[85vmin] h-[85vmin] max-w-[360px] max-h-[360px] border-[8px] border-zinc-900 rounded-full flex items-center justify-center my-auto">
+                        <div id="rth-arrow" class="absolute inset-0 w-full h-full transition-transform duration-200 flex justify-center" style="transform: rotate(0deg)">
+                            ${svgIcon('arrow-up', 'ph-bold text-blue-500 text-[64px] -mt-7 drop-shadow-[0_0_15px_rgba(59,130,246,1)]')}
+                        </div>
+                        <div class="flex flex-col items-center z-10 pointer-events-none">
+                            <span id="main-val" class="${mainValueClass(main.id)} font-black text-white tracking-tighter leading-none relative drop-shadow-[0_4px_8px_rgba(0,0,0,1)]">${formatValueText(main.id, main.value)}</span>
+                            <span class="${mainUnitClass(main.id)} text-zinc-300 font-bold mt-0.5 drop-shadow-[0_2px_4px_rgba(0,0,0,1)]">${main.unit}</span>
+                        </div>
+                        <div id="rth-stats" class="absolute bottom-20 flex flex-col items-center z-10 pointer-events-none drop-shadow-[0_2px_4px_rgba(0,0,0,1)] text-center leading-tight"></div>
+                        <div class="absolute -bottom-4 flex gap-2 z-20">
+                            <button onclick="setHomeLocation()" class="bg-zinc-800 px-3 py-1.5 rounded-full text-[9px] tracking-widest font-bold text-zinc-300 active:bg-zinc-700 border border-zinc-700 shadow-lg">FIJAR HOME</button>
+                            <button onclick="calibrateAltitude()" class="bg-zinc-800 px-3 py-1.5 rounded-full text-[9px] tracking-widest font-bold text-zinc-300 active:bg-zinc-700 border border-zinc-700 shadow-lg">CALIBRAR</button>
+                        </div>
+                    </div>
+                `;
+            } else if (main.id === 'alt') {
+                mainContainer.innerHTML = `
+                    <div class="text-zinc-500 uppercase tracking-widest font-bold text-base mt-1 z-10 flex items-center gap-2">
+                        ${svgIcon(main.icon, 'text-xl')} ${main.label}
+                    </div>
+                    <div class="flex items-baseline gap-2 z-10 bg-black/60 px-4 py-2 rounded-3xl backdrop-blur-sm border border-zinc-800/50 my-auto">
+                        <span id="main-val" class="${mainValueClass(main.id)} font-black tracking-tighter leading-none ${getColorClass(main.id, main.value)}">${formatValueText(main.id, main.value)}</span>
+                        <span class="${mainUnitClass(main.id)} text-zinc-500 font-bold">${main.unit}</span>
+                    </div>
+                    <button onclick="calibrateAltitude()" class="absolute bottom-4 bg-zinc-800 px-4 py-1.5 rounded-full text-[9px] tracking-widest font-bold text-zinc-300 active:bg-zinc-700 border border-zinc-700 shadow-lg z-20">CALIBRAR ALT</button>
+                `;
+            } else {
+                let extraCompass = '';
+                if (main.id === 'bearing') {
+                    extraCompass = `
+                        <div id="compass-ring" class="absolute inset-0 w-full h-full flex items-center justify-center transition-transform duration-200">
+                            <div class="w-[85vmin] h-[85vmin] max-w-[360px] max-h-[360px] border-[4px] border-zinc-800 rounded-full relative">
+                                <div class="absolute -top-7 left-1/2 -translate-x-1/2"><span class="compass-label text-red-500 font-bold text-3xl">N</span></div>
+                                <div class="absolute top-1/2 -right-7 -translate-y-1/2"><span class="compass-label text-zinc-500 font-bold text-3xl">E</span></div>
+                                <div class="absolute -bottom-7 left-1/2 -translate-x-1/2"><span class="compass-label text-zinc-500 font-bold text-3xl">S</span></div>
+                                <div class="absolute top-1/2 -left-7 -translate-y-1/2"><span class="compass-label text-zinc-500 font-bold text-3xl">O</span></div>
+                            </div>
+                        </div>
+                        ${svgIcon('caret-up', 'ph-fill absolute top-[10%] text-red-500 text-3xl z-10')}
+                    `;
+                }
+                mainContainer.innerHTML = `
+                    <div class="text-zinc-500 uppercase tracking-widest font-bold text-base mt-1 z-10 flex items-center gap-2">
+                        ${svgIcon(main.icon, 'text-xl')} ${main.label}
+                    </div>
+                    ${extraCompass}
+                    <div class="flex items-baseline gap-2 z-10 bg-black/60 px-4 py-2 rounded-3xl backdrop-blur-sm border border-zinc-800/50 my-auto">
+                        <span id="main-val" class="${mainValueClass(main.id)} font-black tracking-tighter leading-none ${getColorClass(main.id, main.value)}">${formatValueText(main.id, main.value)}</span>
+                        <span class="${mainUnitClass(main.id)} text-zinc-500 font-bold">${main.unit}</span>
+                    </div>
+                `;
+            }
+
+            auxContainer.innerHTML = '';
+            auxOrder.forEach(metricId => {
+                const metric = metrics[metricId];
+                const el = document.createElement('div');
+                el.className = "aux-panel h-[13vh] min-h-[5rem] max-h-[120px] bg-zinc-950 rounded-xl flex flex-col items-center justify-start pt-2 border border-zinc-900 active:bg-zinc-800 transition-colors cursor-grab p-1 shadow-md relative overflow-hidden";
+                el.dataset.id = metric.id;
+                el.draggable = true;
+                el.style.touchAction = 'none';
+
+                const textSize = auxTextSize(metric.id);
+                el.innerHTML = `
+                    <div class="w-full flex items-center justify-center gap-1 shrink-0 text-zinc-500 uppercase tracking-widest font-bold text-[9px] pointer-events-none">
+                        ${svgIcon(metric.icon, 'text-sm')} ${metric.label}
+                    </div>
+                    <div class="flex-1 flex flex-col items-center justify-center w-full pointer-events-none">
+                        <span id="aux-val-${metric.id}" class="${textSize} font-black ${getColorClass(metric.id, metric.value)} tracking-tight leading-none pointer-events-none">${formatValueText(metric.id, metric.value)}</span>
+                        ${(metric.id !== 'bearing' && metric.id !== 'gr') ? `<span class="text-[9px] text-zinc-500 font-bold pointer-events-none mt-0.5">${metric.unit}</span>` : '<span class="text-[9px] opacity-0 pointer-events-none mt-0.5 select-none">-</span>'}
+                    </div>
+                `;
+
+                el.addEventListener('click', () => {
+                    if (el.classList.contains('was-dragged')) { el.classList.remove('was-dragged'); return; }
+                    const clickedId = el.dataset.id;
+                    const oldMainId = activeMainId;
+                    activeMainId = clickedId;
+                    auxOrder = auxOrder.map(id => id === clickedId ? oldMainId : id);
+                    if (mapViewActive) closeMap();
+                    updateDisplay();
+                });
+                el.addEventListener('dragstart', (e) => {
+                    e.dataTransfer.setData('text/plain', metric.id);
+                    el.classList.add('dragging');
+                });
+                el.addEventListener('dragend', () => el.classList.remove('dragging'));
+                el.addEventListener('dragover', (e) => { e.preventDefault(); el.classList.add('drag-over'); });
+                el.addEventListener('dragleave', () => el.classList.remove('drag-over'));
+                el.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    el.classList.remove('drag-over');
+                    const draggedId = e.dataTransfer.getData('text/plain');
+                    if (draggedId !== metric.id) swapAuxPanels(draggedId, metric.id);
+                });
+
+                let touchStartX = 0, touchStartY = 0;
+                el.addEventListener('touchstart', (e) => {
+                    touchStartX = e.touches[0].clientX; touchStartY = e.touches[0].clientY;
+                    el.classList.add('dragging');
+                });
+                el.addEventListener('touchmove', (e) => {
+                    if (Math.abs(e.touches[0].clientX - touchStartX) > 10 || Math.abs(e.touches[0].clientY - touchStartY) > 10) {
+                        el.classList.add('was-dragged');
+                    }
+                });
+                el.addEventListener('touchend', (e) => {
+                    el.classList.remove('dragging');
+                    if (el.classList.contains('was-dragged')) {
+                        const touch = e.changedTouches[0];
+                        const targetEl = document.elementFromPoint(touch.clientX, touch.clientY);
+                        const targetPanel = targetEl?.closest('.aux-panel');
+                        if (targetPanel && targetPanel !== el) swapAuxPanels(el.dataset.id, targetPanel.dataset.id);
+                        setTimeout(() => el.classList.remove('was-dragged'), 100);
+                    }
+                });
+
+                auxContainer.appendChild(el);
+            });
+        }
+
+        function auxTextSize(id) {
+            if (id === 'bearing') return 'text-xl sm:text-2xl';
+            if (id === 'rth')     return 'text-lg sm:text-xl';
+            if (id === 'gr')      return 'text-lg sm:text-xl';
+            return 'text-2xl sm:text-3xl';
+        }
+
+        function swapAuxPanels(id1, id2) {
+            const idx1 = auxOrder.indexOf(id1);
+            const idx2 = auxOrder.indexOf(id2);
+            if (idx1 !== -1 && idx2 !== -1) {
+                auxOrder[idx1] = id2;
+                auxOrder[idx2] = id1;
+                updateDisplay();
+            }
+        }
+
+        function updateValues() {
+            const windValEl = document.getElementById('wind-val');
+            if (windValEl) windValEl.innerText = windSpeed > 0 ? Math.round(windSpeed) : '--';
+            const windDirEl = document.getElementById('wind-dir');
+            if (windDirEl) windDirEl.innerText = windSpeed > 0 ? getCardinal(windFromDeg) : '--';
+            const windArrow = document.getElementById('wind-arrow');
+            if (windArrow) windArrow.style.transform = `rotate(${windFromDeg - metrics.bearing.smoothed}deg)`;
+
+            const sinkRate = -metrics.vario.smoothed;
+            if (sinkRate > 0.05) {
+                const speedMs = metrics.speed.smoothed / 3.6;
+                metrics.gr.value = speedMs / sinkRate;
+            } else {
+                metrics.gr.value = 0;
+            }
+
+            if (activeMainId === 'vario') {
+                drawThermalCanvas();
+                const barUp = document.getElementById('vario-bar');
+                const barDown = document.getElementById('vario-bar-down');
+                if (barUp && barDown) {
+                    let v = metrics.vario.smoothed;
+                    let pct = Math.min(Math.abs(v) / 5.0 * 50, 50);
+                    if (v >= 0) { barUp.style.height = `${pct}%`; barDown.style.height = `0%`; }
+                    else { barDown.style.height = `${pct}%`; barUp.style.height = `0%`; }
+                }
+            } else if (activeMainId === 'bearing') {
+                const ring = document.getElementById('compass-ring');
+                if (ring) ring.style.transform = `rotate(${-metrics.bearing.smoothed}deg)`;
+                document.querySelectorAll('.compass-label').forEach(el => {
+                    el.style.transform = `rotate(${metrics.bearing.smoothed}deg)`;
+                });
+            } else if (activeMainId === 'rth') {
+                const arrow = document.getElementById('rth-arrow');
+                const rthAngle = metrics.rth.targetBearing - metrics.bearing.smoothed;
+                if (arrow) arrow.style.transform = `rotate(${rthAngle}deg)`;
+
+                const stats = document.getElementById('rth-stats');
+                if (stats) {
+                    const distMeters = metrics.rth.smoothed * 1000;
+                    const altDiff = metrics.alt.smoothed - homeAlt;
+                    if (distMeters < 100) {
+                        stats.innerHTML = `<span class="text-sm font-bold text-emerald-400">EN ZONA</span>`;
+                    } else if (altDiff <= 0) {
+                        stats.innerHTML = `<span class="text-sm font-bold text-red-500">NO LLEGAS (BAJO)</span>`;
+                    } else {
+                        const reqGr = distMeters / altDiff;
+                        const color = reqGr < 7 ? "text-emerald-400" : (reqGr < 9 ? "text-yellow-400" : "text-red-500");
+                        const text  = reqGr < 7 ? "LLEGAS" : (reqGr < 9 ? "AL LÍMITE" : "NO LLEGAS");
+                        stats.innerHTML = `
+                            <span class="text-[10px] text-zinc-300 font-bold tracking-widest">REQ: ${reqGr.toFixed(1)}:1</span>
+                            <span class="text-sm font-black ${color}">${text}</span>
+                        `;
+                    }
+                }
+            }
+
+            const mainVal = document.getElementById('main-val');
+            if (mainVal) {
+                const base = `${mainValueClass(activeMainId)} font-black tracking-tighter leading-none`;
+                if (activeMainId === 'rth') {
+                    mainVal.className = `${base} text-white relative drop-shadow-[0_4px_8px_rgba(0,0,0,1)]`;
+                } else {
+                    mainVal.className = `${base} ${getColorClass(activeMainId, metrics[activeMainId].smoothed)}`;
+                }
+                mainVal.innerText = formatValueText(activeMainId, metrics[activeMainId].smoothed);
+            }
+
+            auxOrder.forEach(id => {
+                const el = document.getElementById(`aux-val-${id}`);
+                if (el) {
+                    el.className = `${auxTextSize(id)} font-black ${getColorClass(id, metrics[id].smoothed)} tracking-tight leading-none mb-1 pointer-events-none`;
+                    el.innerText = formatValueText(id, metrics[id].smoothed);
+                }
+            });
+        }
+
+        function drawThermalCanvas() {
+            const canvas = document.getElementById('thermal-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+
+            const w = canvas.parentElement.clientWidth;
+            const h = canvas.parentElement.clientHeight;
+            if (w > 0 && h > 0 && (canvas.width !== w || canvas.height !== h)) {
+                canvas.width = w;
+                canvas.height = h;
+            }
+
+            const cx = canvas.width / 2, cy = canvas.height / 2;
+            const pixelsPerMeter = Math.min(canvas.width / 120, canvas.height / 120);
+            const outerRingRadius = 40 * pixelsPerMeter;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.strokeStyle = '#18181b';
+            ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.arc(cx, cy, 20 * pixelsPerMeter, 0, 2 * Math.PI); ctx.stroke();
+            ctx.beginPath(); ctx.arc(cx, cy, outerRingRadius, 0, 2 * Math.PI); ctx.stroke();
+
+            const cardinals = [
+                { l: 'N', a: 0,   c: '#ef4444' },
+                { l: 'E', a: 90,  c: '#52525b' },
+                { l: 'S', a: 180, c: '#52525b' },
+                { l: 'O', a: 270, c: '#52525b' }
+            ];
+            ctx.font = "bold 14px sans-serif";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            const rText = outerRingRadius + 20;
+            cardinals.forEach(card => {
+                const ang = (card.a - metrics.bearing.smoothed) * Math.PI / 180;
+                const x = cx + Math.sin(ang) * rText;
+                const y = cy - Math.cos(ang) * rText;
+                ctx.fillStyle = card.c;
+                ctx.fillText(card.l, x, y);
+            });
+
+            if (homeLocation || isSimulating) {
+                const rthAngle = (metrics.rth.targetBearing - metrics.bearing.smoothed) * Math.PI / 180;
+                ctx.save();
+                ctx.translate(cx, cy);
+                ctx.rotate(rthAngle);
+                ctx.beginPath();
+                ctx.moveTo(0, -outerRingRadius - 16);
+                ctx.lineTo(-6, -outerRingRadius - 6);
+                ctx.lineTo(6, -outerRingRadius - 6);
+                ctx.closePath();
+                ctx.fillStyle = '#3b82f6';
+                ctx.fill();
+                ctx.restore();
+
+                const hx = cx + Math.sin(rthAngle) * (outerRingRadius + 26);
+                const hy = cy - Math.cos(rthAngle) * (outerRingRadius + 26);
+                ctx.font = "bold 12px sans-serif";
+                ctx.fillStyle = '#3b82f6';
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText("H", hx, hy);
+            }
+
+            if (thermalHistory.length < 2) return;
+
+            const current = thermalHistory[thermalHistory.length - 1];
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            const maxAge = 60000;
+
+            for (let i = 1; i < thermalHistory.length; i++) {
+                const p1 = thermalHistory[i - 1];
+                const p2 = thermalHistory[i];
+                const age = current.t - p2.t;
+                if (age > maxAge) continue;
+
+                const screenX1 = cx + (p1.x - current.x) * pixelsPerMeter;
+                const screenY1 = cy - (p1.y - current.y) * pixelsPerMeter;
+                const screenX2 = cx + (p2.x - current.x) * pixelsPerMeter;
+                const screenY2 = cy - (p2.y - current.y) * pixelsPerMeter;
+
+                const opacity = Math.max(0, 1 - Math.pow(age / maxAge, 2));
+
+                let v = p2.v;
+                let strokeColor = `rgba(255, 255, 255, ${opacity * 0.3})`;
+                let lineWidth = 2;
+
+                if (v > 0) {
+                    const intensity = Math.min(v / 3.0, 1.0);
+                    const g = Math.floor(255 * (1 - intensity));
+                    strokeColor = `rgba(255, ${g}, ${g}, ${opacity})`;
+                    lineWidth = 2 + (intensity * 6);
+                } else if (v < 0) {
+                    strokeColor = `rgba(59, 130, 246, ${opacity * 0.7})`;
+                    lineWidth = 1;
+                }
+
+                ctx.beginPath();
+                ctx.moveTo(screenX1, screenY1);
+                ctx.lineTo(screenX2, screenY2);
+                ctx.strokeStyle = strokeColor;
+                ctx.lineWidth = lineWidth;
+                ctx.stroke();
+            }
+
+            ctx.beginPath(); ctx.arc(cx, cy, 4, 0, 2 * Math.PI);
+            ctx.fillStyle = 'white'; ctx.fill();
+        }
+
+        // ============================================================================
+        // MAPA
+        // ============================================================================
+        function getAirCorrectedPos(p, tNow) {
+            if (windSpeed < 1 || !p.time) return { lat: p.lat, lon: p.lon };
+            const dt = Math.max(0, (tNow - p.time) / 1000);
+            if (dt <= 0) return { lat: p.lat, lon: p.lon };
+            const windMs = windSpeed / 3.6;
+            const windRad = windToDeg * Math.PI / 180;
+            const dxMeters = windMs * Math.sin(windRad) * dt;
+            const dyMeters = windMs * Math.cos(windRad) * dt;
+            const latRad = p.lat * Math.PI / 180;
+            return {
+                lat: p.lat + dyMeters / 111320,
+                lon: p.lon + dxMeters / (111320 * Math.cos(latRad) || 1)
+            };
+        }
+
+        function computeThermalCore(tNow) {
+            const maxAgeMs = 90000;
+            const threshold = 1.0;
+            let sumW = 0, sumLat = 0, sumLon = 0;
+            for (let i = flightPath.length - 1; i >= 0; i--) {
+                const p = flightPath[i];
+                if (tNow - p.time > maxAgeMs) break;
+                const v = p.vario || 0;
+                if (v <= threshold) continue;
+                const pos = getAirCorrectedPos(p, tNow);
+                const w = v - threshold;
+                sumW += w;
+                sumLat += pos.lat * w;
+                sumLon += pos.lon * w;
+            }
+            if (sumW <= 0.01) return null;
+            return { lat: sumLat / sumW, lon: sumLon / sumW };
+        }
+
+        const ThermalTrailLayer = (typeof L !== 'undefined') ? L.Layer.extend({
+            onAdd(map) {
+                this._map = map;
+                this._canvas = L.DomUtil.create('canvas', 'leaflet-zoom-animated');
+                this._canvas.style.pointerEvents = 'none';
+                map.getPanes().overlayPane.appendChild(this._canvas);
+                map.on('move zoom viewreset', this._reset, this);
+                this._reset();
+            },
+            onRemove(map) {
+                map.getPanes().overlayPane.removeChild(this._canvas);
+                map.off('move zoom viewreset', this._reset, this);
+            },
+            _reset() {
+                if (!this._map) return;
+                const size = this._map.getSize();
+                if (size.x === 0 || size.y === 0) return;
+                const topLeft = this._map.containerPointToLayerPoint([0, 0]);
+                L.DomUtil.setPosition(this._canvas, topLeft);
+                this._canvas.width = size.x;
+                this._canvas.height = size.y;
+                this._draw();
+            },
+            _draw() {
+                const ctx = this._canvas.getContext('2d');
+                ctx.clearRect(0, 0, this._canvas.width, this._canvas.height);
+                if (!flightPath || flightPath.length < 2) return;
+                const map = this._map;
+                const tNow = Date.now();
+                const maxAgeMs = 90000;
+                const maxPoints = 400;
+                const start = Math.max(0, flightPath.length - maxPoints);
+
+                const pts = [];
+                for (let i = start; i < flightPath.length; i++) {
+                    const p = flightPath[i];
+                    if (tNow - p.time > maxAgeMs) continue;
+                    const pos = getAirCorrectedPos(p, tNow);
+                    pts.push({ lat: pos.lat, lon: pos.lon, vario: p.vario || 0, age: tNow - p.time });
+                }
+
+                if (pts.length >= 2) {
+                    ctx.lineCap = 'round';
+                    ctx.lineJoin = 'round';
+                    for (let i = 1; i < pts.length; i++) {
+                        const p1 = pts[i - 1];
+                        const p2 = pts[i];
+                        const pt1 = map.latLngToContainerPoint([p1.lat, p1.lon]);
+                        const pt2 = map.latLngToContainerPoint([p2.lat, p2.lon]);
+                        const opacity = Math.max(0.12, 1 - Math.pow(p2.age / maxAgeMs, 2));
+                        let color, width;
+                        const v = p2.vario;
+                        if (v > 0.5) {
+                            const intensity = Math.min(v / 3, 1);
+                            const g = Math.floor(255 * (1 - intensity));
+                            color = `rgba(255, ${g}, ${g}, ${opacity})`;
+                            width = 3 + intensity * 5;
+                        } else if (v < -0.5) {
+                            color = `rgba(59, 130, 246, ${opacity * 0.8})`;
+                            width = 2;
+                        } else {
+                            color = `rgba(255, 255, 255, ${opacity * 0.4})`;
+                            width = 2;
+                        }
+                        ctx.strokeStyle = color;
+                        ctx.lineWidth = width;
+                        ctx.beginPath();
+                        ctx.moveTo(pt1.x, pt1.y);
+                        ctx.lineTo(pt2.x, pt2.y);
+                        ctx.stroke();
+                    }
+                }
+
+                const core = computeThermalCore(tNow);
+                if (core) {
+                    const cp = map.latLngToContainerPoint([core.lat, core.lon]);
+                    const grad = ctx.createRadialGradient(cp.x, cp.y, 0, cp.x, cp.y, 26);
+                    grad.addColorStop(0, 'rgba(239, 68, 68, 0.55)');
+                    grad.addColorStop(1, 'rgba(239, 68, 68, 0)');
+                    ctx.fillStyle = grad;
+                    ctx.beginPath();
+                    ctx.arc(cp.x, cp.y, 26, 0, 2 * Math.PI);
+                    ctx.fill();
+                    ctx.strokeStyle = 'rgba(239, 68, 68, 0.9)';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.arc(cp.x, cp.y, 9, 0, 2 * Math.PI);
+                    ctx.stroke();
+                    ctx.fillStyle = 'rgba(239, 68, 68, 1)';
+                    ctx.beginPath();
+                    ctx.arc(cp.x, cp.y, 3, 0, 2 * Math.PI);
+                    ctx.fill();
+                }
+            },
+            redraw() { if (this._map) this._draw(); }
+        }) : null;
+
+        function initLeaflet() {
+            if (mapInitialized) return;
+            if (typeof L === 'undefined') return;
+
+            const container = document.getElementById('leaflet-map');
+            leafletMap = L.map(container, {
+                zoomControl: false,
+                attributionControl: true,
+                tap: false
+            }).setView([-34.6, -58.4], 13); // Centrado por defecto
+
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                maxZoom: 19,
+                subdomains: 'abcd',
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+            }).addTo(leafletMap);
+
+            if (ThermalTrailLayer) {
+                mapTrailLayer = new ThermalTrailLayer();
+                mapTrailLayer.addTo(leafletMap);
+            }
+
+            mapPositionMarker = L.marker([0, 0], {
+                icon: L.divIcon({
+                    className: '',
+                    html: '<div style="width:22px;height:22px;background:#3b82f6;border:3px solid white;border-radius:50%;box-shadow:0 0 10px rgba(59,130,246,0.8);"></div>',
+                    iconSize: [22, 22],
+                    iconAnchor: [11, 11]
+                })
+            }).addTo(leafletMap);
+
+            mapHomeMarker = L.marker([0, 0], {
+                icon: L.divIcon({
+                    className: '',
+                    html: '<div style="background:#ef4444;color:white;padding:3px 7px;border-radius:4px;font-weight:bold;font-size:14px;border:2px solid white;box-shadow:0 2px 4px rgba(0,0,0,0.6);">H</div>',
+                    iconSize: [28, 24],
+                    iconAnchor: [14, 12]
+                })
+            });
+
+            leafletMap.on('dragstart', () => {
+                mapFollowMode = false;
+            });
+
+            mapInitialized = true;
+        }
+
+        function updateMap() {
+            if (!leafletMap) return;
+            leafletMap.invalidateSize();
+
+            if (flightPath.length === 0) {
+                updateMapHUD();
+                return;
+            }
+
+            const last = flightPath[flightPath.length - 1];
+            if (mapPositionMarker) mapPositionMarker.setLatLng([last.lat, last.lon]);
+
+            if (homeLocation) {
+                if (mapHomeMarker) {
+                    mapHomeMarker.setLatLng([homeLocation.lat, homeLocation.lon]);
+                    if (!leafletMap.hasLayer(mapHomeMarker)) leafletMap.addLayer(mapHomeMarker);
+                }
+            }
+
+            if (mapFollowMode) {
+                const targetZoom = Math.max(leafletMap.getZoom(), 13);
+                const currentCenter = leafletMap.getCenter();
+                const dist = currentCenter.distanceTo([last.lat, last.lon]);
+                if (dist > 50) {
+                    leafletMap.setView([last.lat, last.lon], targetZoom, { animate: false });
+                } else {
+                    leafletMap.panTo([last.lat, last.lon], { animate: false });
+                }
+            }
+
+            if (mapTrailLayer) mapTrailLayer.redraw();
+            updateMapHUD();
+        }
+
+        function updateMapHUD() {
+            const varioEl = document.getElementById('map-vario');
+            if (varioEl) {
+                const v = metrics.vario.smoothed;
+                varioEl.innerText = (v > 0 ? '+' : '') + v.toFixed(1);
+                varioEl.className = `text-4xl font-black leading-none mt-0.5 ${getColorClass('vario', v)}`;
+            }
+            const altEl = document.getElementById('map-alt');
+            if (altEl) altEl.innerHTML = `${Math.round(metrics.alt.smoothed)}<span class="text-sm text-zinc-400 ml-1">m</span>`;
+            const speedEl = document.getElementById('map-speed');
+            if (speedEl) speedEl.innerHTML = `${Math.round(metrics.speed.smoothed)}<span class="text-sm text-zinc-400 ml-1">km/h</span>`;
+        }
+
+        function toggleMap() {
+            if (mapViewActive) {
+                closeMap();
+                return;
+            }
+            if (typeof L === 'undefined') {
+                alert('El mapa necesita internet la primera vez para cargar Leaflet. El resto de la app funciona sin conexión.');
+                return;
+            }
+            mapViewActive = true;
+            const mapViewEl = document.getElementById('map-view');
+            mapViewEl.classList.remove('hidden');
+            
+            // Fuerza el recalculo de layout ANTES de inicializar
+            void mapViewEl.offsetHeight;
+            void mapViewEl.offsetWidth;
+
+            document.getElementById('btn-map').classList.add('bg-emerald-600', 'text-white');
+            document.getElementById('btn-map').classList.remove('bg-zinc-800', 'text-zinc-300');
+            initLeaflet();
+
+            requestAnimationFrame(() => {
+                if (leafletMap) leafletMap.invalidateSize();
+            });
+
+            setTimeout(() => {
+                if (!leafletMap) return;
+                leafletMap.invalidateSize();
+
+                if (flightPath.length > 0) {
+                    const last = flightPath[flightPath.length - 1];
+                    leafletMap.setView([last.lat, last.lon], 12, { animate: false });
+                    mapFollowMode = true;
+                } else if (isSimulating && window._simState) {
+                    leafletMap.setView([window._simState.centerLat, window._simState.centerLon], 12, { animate: false });
+                    mapFollowMode = true;
+                } else if (!isSimulating) {
+                    leafletMap.locate({ setView: true, maxZoom: 13 });
+                }
+            }, 350);
+        }
+
+        function closeMap() {
+            mapViewActive = false;
+            document.getElementById('map-view').classList.add('hidden');
+            document.getElementById('btn-map').classList.remove('bg-emerald-600', 'text-white');
+            document.getElementById('btn-map').classList.add('bg-zinc-800', 'text-zinc-300');
+        }
+
+        function centerMap() {
+            if (!leafletMap) return;
+            leafletMap.invalidateSize();
+            mapFollowMode = true;
+            if (flightPath.length > 0) {
+                const last = flightPath[flightPath.length - 1];
+                leafletMap.setView([last.lat, last.lon], Math.max(leafletMap.getZoom(), 12), { animate: false });
+            } else if (isSimulating && window._simState) {
+                leafletMap.setView([window._simState.centerLat, window._simState.centerLon], 12, { animate: false });
+            }
+        }
+
+        // ============================================================================
+        // AUDIO
+        // ============================================================================
+        function toggleAudio() {
+            const btn = document.getElementById('btn-audio');
+            if (!audioEnabled) {
+                if (!audioCtx) {
+                    try {
+                        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                        audioOsc = audioCtx.createOscillator();
+                        audioGain = audioCtx.createGain();
+                        audioOsc.type = 'sine';
+                        audioOsc.frequency.value = 400;
+                        audioGain.gain.value = 0;
+                        audioOsc.connect(audioGain).connect(audioCtx.destination);
+                        audioOsc.start();
+                    } catch (e) { console.error('Audio no disponible:', e); return; }
+                }
+                audioCtx.resume();
+                audioEnabled = true;
+                btn.innerHTML = svgIcon('speaker-high');
+                btn.classList.add('bg-emerald-600', 'text-white');
+                btn.classList.remove('bg-zinc-800', 'text-zinc-300');
+            } else {
+                audioEnabled = false;
+                if (audioGain && audioCtx) audioGain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.05);
+                btn.innerHTML = svgIcon('speaker-slash');
+                btn.classList.remove('bg-emerald-600', 'text-white');
+                btn.classList.add('bg-zinc-800', 'text-zinc-300');
+            }
+        }
+
+        function updateAudio() {
+            if (!audioEnabled || !audioGain || !audioCtx) return;
+            const v = metrics.vario.smoothed;
+            if (v < -1.5) {
+                audioOsc.frequency.setTargetAtTime(220, audioCtx.currentTime, 0.1);
+                audioGain.gain.setTargetAtTime(0.12, audioCtx.currentTime, 0.1);
+            } else if (v < 0.2) {
+                audioGain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.1);
+            } else {
+                audioOsc.frequency.setTargetAtTime(500 + Math.min(v, 5) * 150, audioCtx.currentTime, 0.08);
+                audioGain.gain.setTargetAtTime(Math.min(0.2, 0.08 + v * 0.04), audioCtx.currentTime, 0.08);
+            }
+        }
+
+        // ============================================================================
+        // SIMULACIÓN
+        // ============================================================================
+        function toggleSim() {
+            isSimulating = !isSimulating;
+            const btn = document.getElementById('btn-sim');
+            if (isSimulating) {
+                btn.classList.replace('bg-purple-600/20', 'bg-purple-600');
+                btn.classList.replace('text-purple-400', 'text-white');
+                windSpeed = 22;
+                windToDeg = 135;
+                windFromDeg = (windToDeg + 180) % 360;
+                flightPath = [];
+                window._simState = { centerLat: -34.6, centerLon: -58.4, angle: 0, lastPush: 0 };
+                if (mapViewActive && leafletMap) {
+                    setTimeout(() => {
+                        if (window._simState && leafletMap) {
+                            leafletMap.invalidateSize();
+                            leafletMap.setView([window._simState.centerLat, window._simState.centerLon], 12, { animate: false });
+                            mapFollowMode = true;
+                        }
+                    }, 300);
+                }
+            } else {
+                btn.classList.replace('bg-purple-600', 'bg-purple-600/20');
+                btn.classList.replace('text-white', 'text-purple-400');
+                thermalHistory = [];
+                flightPath = [];
+                window._simState = null;
+                windSpeed = 0;
+            }
+        }
+
+        let lastTime = Date.now();
+        function gameLoop() {
+            try {
+                const now = Date.now();
+                const dt = Math.min((now - lastTime) / 1000, 0.1);
+                lastTime = now;
+
+                if (isSimulating) {
+                    metrics.vario.value = Math.sin(now / 2000) * 3 + (Math.random() - 0.5) * 0.4;
+                    metrics.alt.value += metrics.vario.value * dt;
+                    metrics.speed.value += (Math.random() - 0.5) * 0.3;
+                    if (metrics.speed.value < 25) metrics.speed.value = 25;
+                    if (metrics.speed.value > 60) metrics.speed.value = 60;
+                    gliderAngle = (gliderAngle + 18 * dt) % 360;
+                    metrics.bearing.value = gliderAngle;
+                    metrics.rth.value += 0.0005;
+                    metrics.rth.targetBearing = (metrics.rth.targetBearing + 10 * dt) % 360;
+
+                    if (!window._simState) {
+                        window._simState = { centerLat: -34.6, centerLon: -58.4, angle: 0, lastPush: 0 };
+                    }
+                    const simState = window._simState;
+                    if (now - simState.lastPush > 250) {
+                        const dtSim = (now - simState.lastPush) / 1000;
+                        const windMs = windSpeed / 3.6;
+                        const windRad = windToDeg * Math.PI / 180;
+                        simState.centerLat += windMs * Math.cos(windRad) * dtSim / 111320;
+                        simState.centerLon += windMs * Math.sin(windRad) * dtSim / (111320 * Math.cos(simState.centerLat * Math.PI / 180));
+                        simState.angle += 18 * Math.PI / 180 * dtSim;
+                        const R = 50 / 111320;
+                        const lat = simState.centerLat + R * Math.cos(simState.angle);
+                        const lon = simState.centerLon + R * Math.sin(simState.angle) / Math.cos(simState.centerLat * Math.PI / 180);
+                        flightPath.push({ lat, lon, alt: metrics.alt.value, vario: metrics.vario.smoothed, time: now });
+                        simState.lastPush = now;
+                    }
+                }
+
+                Object.keys(metrics).forEach(key => {
+                    let m = metrics[key];
+                    if (key === 'bearing') {
+                        let diff = m.value - m.smoothed;
+                        while (diff < -180) diff += 360;
+                        while (diff > 180) diff -= 360;
+                        m.smoothed += diff * 0.08;
+                        if (m.smoothed < 0) m.smoothed += 360;
+                        if (m.smoothed >= 360) m.smoothed -= 360;
+                    } else {
+                        m.smoothed += (m.value - m.smoothed) * 0.08;
+                    }
+                });
+
+                const speedMs = metrics.speed.smoothed / 3.6;
+                const headingRad = metrics.bearing.smoothed * Math.PI / 180;
+                const windRad = windToDeg * Math.PI / 180;
+                const windSpeedMs = windSpeed / 3.6;
+                const airVx = (speedMs * Math.sin(headingRad)) - (windSpeedMs * Math.sin(windRad));
+                const airVy = (speedMs * Math.cos(headingRad)) - (windSpeedMs * Math.cos(windRad));
+                airX += airVx * dt;
+                airY += airVy * dt;
+
+                if (now - lastThermalPush > 100) {
+                    thermalHistory.push({ x: airX, y: airY, v: metrics.vario.smoothed, t: now });
+                    lastThermalPush = now;
+                }
+                while (thermalHistory.length && now - thermalHistory[0].t > 60000) thermalHistory.shift();
+
+                updateValues();
+                updateAudio();
+
+                if (mapViewActive && now - lastMapUpdate > 250) {
+                    updateMap();
+                    lastMapUpdate = now;
+                }
+            } catch (e) {
+                console.error('gameLoop error:', e);
+            } finally {
+                requestAnimationFrame(gameLoop);
+            }
+        }
+
+        function setGpsBtnState(state) {
+            const b = document.getElementById('btn-gps');
+            const s = document.getElementById('gps-status');
+            b.classList.remove('bg-zinc-800','bg-emerald-600','bg-red-600','text-zinc-300','text-white');
+            if (state === 'off')       { b.classList.add('bg-zinc-800','text-zinc-300'); s.innerText = 'GPS'; }
+            if (state === 'searching') { b.classList.add('bg-emerald-600','text-white'); s.innerText = 'Buscando...'; }
+            if (state === 'on')        { b.classList.add('bg-emerald-600','text-white'); s.innerText = 'GPS ON'; }
+            if (state === 'error')     { b.classList.add('bg-red-600','text-white');     s.innerText = 'GPS !'; }
+        }
+
+        function toggleGPS() {
+            const igcBtn = document.getElementById('btn-igc');
+            if (isGpsActive) {
+                navigator.geolocation.clearWatch(gpsWatchId);
+                isGpsActive = false;
+                gpsWatchId = null;
+                setGpsBtnState('off');
+                igcBtn.classList.add('hidden');
+                return;
+            }
+            if (!("geolocation" in navigator)) { alert('Geolocalización no disponible'); return; }
+
+            setGpsBtnState('searching');
+            requestWakeLock();
+
+            gpsWatchId = navigator.geolocation.watchPosition(
+                (position) => {
+                    isGpsActive = true;
+                    setGpsBtnState('on');
+                    igcBtn.classList.remove('hidden');
+
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    const spd = position.coords.speed;
+                    const hdg = position.coords.heading;
+                    const alt = position.coords.altitude;
+                    const now = Date.now();
+
+                    const last = flightPath[flightPath.length - 1];
+                    const moved = !last || Math.abs(lat - last.lat) + Math.abs(lon - last.lon) > 0.00005;
+                    if (!last || now - last.time > 1000 || moved) {
+                        flightPath.push({ lat, lon, alt: alt ?? metrics.alt.smoothed, vario: metrics.vario.smoothed, time: now });
+                    }
+
+                    if (!isSimulating) {
+                        if (spd !== null) metrics.speed.value = spd * 3.6;
+                        if (hdg !== null) metrics.bearing.value = hdg;
+                        if (alt !== null && metrics.alt.source !== 'baro') {
+                            metrics.alt.value = alt;
+                            metrics.alt.source = 'gps';
+                        }
+                        if (homeLocation) {
+                            const nav = getDistanceAndBearing(lat, lon, homeLocation.lat, homeLocation.lon);
+                            metrics.rth.value = nav.distance;
+                            metrics.rth.targetBearing = nav.bearing;
+                        }
+                    }
+
+                    if (spd !== null && hdg !== null) {
+                        gpsWindow.push({ speed: spd * 3.6, heading: hdg, time: now });
+                    }
+                    gpsWindow = gpsWindow.filter(p => now - p.time <= 60000);
+                    if (gpsWindow.length > 10) {
+                        let maxSpd = -1, maxHdg = 0, minSpd = 999;
+                        gpsWindow.forEach(p => {
+                            if (p.speed > maxSpd) { maxSpd = p.speed; maxHdg = p.heading; }
+                            if (p.speed < minSpd) { minSpd = p.speed; }
+                        });
+                        windSpeed = (maxSpd - minSpd) / 2;
+                        windToDeg = maxHdg;
+                        windFromDeg = (maxHdg + 180) % 360;
+                    }
+                },
+                (error) => {
+                    setGpsBtnState('error');
+                    console.error("GPS Error:", error.message || "Permiso denegado");
+                },
+                { enableHighAccuracy: true, maximumAge: 0, timeout: 5000 }
+            );
+        }
+
+        function setBtBtnState(state) {
+            const b = document.getElementById('btn-bt');
+            const s = document.getElementById('bt-status');
+            b.classList.remove('bg-blue-600','bg-emerald-500','bg-red-600');
+            if (state === 'off')        { b.classList.add('bg-blue-600');    s.innerText = 'Vario'; }
+            if (state === 'connecting') { b.classList.add('bg-blue-600');    s.innerText = '...'; }
+            if (state === 'on')         { b.classList.add('bg-emerald-500'); s.innerText = 'OK'; }
+            if (state === 'error')      { b.classList.add('bg-red-600');     s.innerText = 'BT !'; }
+        }
+
+        async function connectBluetooth() {
+            if (!navigator.bluetooth) {
+                alert('Web Bluetooth no disponible. En iOS usa Chrome/Edge en Android, o recompila con Capacitor + BLE nativo.');
+                return;
+            }
+            try {
+                const device = await navigator.bluetooth.requestDevice({
+                    acceptAllDevices: true,
+                    optionalServices: ['0000ffe0-0000-1000-8000-00805f9b34fb']
+                });
+                bleDevice = device;
+                setBtBtnState('connecting');
+
+                device.addEventListener('gattserverdisconnected', onBleDisconnect);
+
+                const server = await device.gatt.connect();
+                const service = await server.getPrimaryService('0000ffe0-0000-1000-8000-00805f9b34fb');
+                bleCharacteristic = await service.getCharacteristic('0000ffe1-0000-1000-8000-00805f9b34fb');
+
+                await bleCharacteristic.startNotifications();
+                bleCharacteristic.addEventListener('characteristicvaluechanged', handleBLEData);
+
+                setBtBtnState('on');
+                requestWakeLock();
+            } catch (error) {
+                console.error("BT Error:", error);
+                setBtBtnState('error');
+            }
+        }
+
+        function onBleDisconnect() {
+            console.warn('BLE desconectado');
+            bleCharacteristic = null;
+            setBtBtnState('error');
+            metrics.alt.source = null;
+        }
+
+        function handleBLEData(event) {
+            const value = new TextDecoder().decode(event.target.value);
+            bleBuffer += value;
+            if (bleBuffer.length > 4096) bleBuffer = bleBuffer.slice(-2048);
+
+            const lines = bleBuffer.split('\n');
+            bleBuffer = lines.pop();
+
+            lines.forEach(line => {
+                if (!line.startsWith('$LK8EX1')) return;
+                const parts = line.split(',');
+                if (parts.length < 4) return;
+                if (isSimulating) return;
+
+                const pressureAlt = parseInt(parts[1]);
+                const varioCm = parseInt(parts[2]);
+
+                if (!isNaN(pressureAlt) && pressureAlt !== 0) {
+                    metrics.alt.value = pressureAlt + baroOffset;
+                    metrics.alt.source = 'baro';
+                }
+                if (!isNaN(varioCm) && varioCm !== -9999) {
+                    metrics.vario.value = varioCm / 100.0;
+                }
+            });
+        }
+
+        function downloadIGC() {
+            if (flightPath.length === 0) return alert("No hay datos de vuelo para exportar.");
+
+            const first = new Date(flightPath[0].time);
+            const dd = String(first.getUTCDate()).padStart(2, '0');
+            const mm = String(first.getUTCMonth() + 1).padStart(2, '0');
+            const yy = String(first.getUTCFullYear() % 100).padStart(2, '0');
+
+            let igc = `AXXXSkySense\nHFDTE${dd}${mm}${yy}\nHFPLTPILOTINCHARGE: PILOT\nHFCMPEVENT: FREEFLIGHT\n`;
+
+            flightPath.forEach(p => {
+                const time = new Date(p.time).toISOString().slice(11, 19).replace(/:/g, '');
+                const latDeg = Math.floor(Math.abs(p.lat));
+                const latMin = ((Math.abs(p.lat) - latDeg) * 60).toFixed(3).padStart(6, '0').replace('.', '');
+                const latDir = p.lat >= 0 ? 'N' : 'S';
+                const lonDeg = Math.floor(Math.abs(p.lon));
+                const lonMin = ((Math.abs(p.lon) - lonDeg) * 60).toFixed(3).padStart(6, '0').replace('.', '');
+                const lonDir = p.lon >= 0 ? 'E' : 'W';
+                const alt = Math.floor(p.alt || 0).toString().padStart(5, '0');
+                igc += `B${time}${latDeg.toString().padStart(2, '0')}${latMin}${latDir}${lonDeg.toString().padStart(3, '0')}${lonMin}${lonDir}A${alt}${alt}\n`;
+            });
+
+            const blob = new Blob([igc], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Vuelo_${dd}${mm}${yy}.igc`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        async function requestWakeLock() {
+            if (!('wakeLock' in navigator)) return;
+            try {
+                wakeLock = await navigator.wakeLock.request('screen');
+                wakeLock.addEventListener('release', () => { wakeLock = null; });
+            } catch (e) { console.warn('WakeLock no disponible:', e); }
+        }
+
+        document.addEventListener('visibilitychange', async () => {
+            if (document.visibilityState === 'visible' && !wakeLock && (isGpsActive || bleCharacteristic)) {
+                await requestWakeLock();
+            }
+        });
+
+        window.addEventListener('resize', () => {
+            if (leafletMap && mapViewActive) {
+                leafletMap.invalidateSize();
+                if (mapTrailLayer) mapTrailLayer._reset();
+            }
+        });
+
+        window.addEventListener('orientationchange', () => {
+            setTimeout(() => {
+                if (leafletMap && mapViewActive) {
+                    leafletMap.invalidateSize();
+                    if (mapTrailLayer) mapTrailLayer._reset();
+                }
+            }, 300);
+        });
+
+        window.onload = function () {
+            try {
+                const saved = parseFloat(localStorage.getItem('skysense_baroOffset'));
+                if (!isNaN(saved)) baroOffset = saved;
+            } catch {}
+
+            if (!navigator.bluetooth) {
+                const b = document.getElementById('btn-bt');
+                b.title = 'Web Bluetooth no disponible (¿iOS?). Usa Android con Chrome/Edge o Capacitor + BLE nativo.';
+                b.style.opacity = '0.6';
+            }
+
+            updateDisplay();
+            gameLoop();
+        };
+    </script>
+</body>
+</html>
